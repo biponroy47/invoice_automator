@@ -16,6 +16,6 @@ This tool serves to automate the generation of the monthly invoices summary file
 
 #### Note
 This tool is currently in testing phase. We will try 2 methods:
-1. direct text parsing with regex
-2. area selection
+1. Direct Text Parsing with Regex Extraction
+2. Region Selection with Text Parsing 
 
