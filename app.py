@@ -1,10 +1,14 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
+import fitz  # PyMuPDF
+
 
 # Global variables
 selected_folder_path = ""
 files_in_folder = []
+pdf_text_content = []
+
 
 def select_folder():
     global selected_folder_path, files_in_folder
@@ -18,12 +22,43 @@ def select_folder():
             if os.path.isfile(os.path.join(selected_folder_path, f))
         ]
         update_file_listbox()
+        read_all_pdfs()
+
 
 def update_file_listbox():
     file_listbox.delete(0, tk.END)  # Clear existing entries
     for file in files_in_folder:
         file_listbox.insert(tk.END, os.path.basename(file))
-    print(files_in_folder)
+
+
+def read_all_pdfs():
+    global pdf_text_content
+    pdf_text_content = []  # Clear previous content
+
+    # Filter all PDF files
+    pdf_files = [f for f in files_in_folder if f.lower().endswith(".pdf")]
+    if not pdf_files:
+        print("No PDF files found.")
+        return
+
+    for pdf_file in pdf_files:
+        try:
+            with fitz.open(pdf_file) as doc:
+                file_text = ""
+                for page in doc:
+                    file_text += page.get_text()
+                pdf_text_content.append(file_text)
+        except Exception as e:
+            print(f"Error reading {pdf_file}: {e}")
+
+    # print("All PDF text extracted successfully.")
+    # print("\n--- Extracted PDF Texts ---")
+    # for i, text in enumerate(pdf_text_content, start=1):
+    #     print(f"\nPDF {i}:\n{text}")
+    for invoice in pdf_text_content:
+        print(invoice)
+        print(len(invoice))
+
 
 root = tk.Tk()
 root.title("Monthly Invoice Automator")
