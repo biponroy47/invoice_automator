@@ -8,6 +8,7 @@ import fitz  # PyMuPDF
 selected_folder_path = ""
 files_in_folder = []
 pdf_text_content = []
+invoice_data = []
 
 
 def select_folder():
@@ -23,6 +24,7 @@ def select_folder():
         ]
         update_file_listbox()
         read_all_pdfs()
+        format_text_content()
 
 
 def update_file_listbox():
@@ -51,13 +53,36 @@ def read_all_pdfs():
         except Exception as e:
             print(f"Error reading {pdf_file}: {e}")
 
-    # print("All PDF text extracted successfully.")
-    # print("\n--- Extracted PDF Texts ---")
-    # for i, text in enumerate(pdf_text_content, start=1):
-    #     print(f"\nPDF {i}:\n{text}")
-    for invoice in pdf_text_content:
-        print(invoice)
-        print(len(invoice))
+
+def format_text_content():
+    global invoice_data
+    invoice_data = []  # Clear previous content
+
+    for pdf in pdf_text_content:
+        invoice_data.append(pdf.split('\n'))
+
+    for invoice in invoice_data:
+        for i, line in enumerate(invoice):
+            if line == "Invoice number :":
+                i += 2
+            elif line == "Invoice date :":
+                i += 2
+            elif line == "PO number :":
+                i += 2
+            elif line == "TOTAL :":
+                i += 2
+            else:
+                del line
+
+    for i, invoice in enumerate(invoice_data):
+        print(f"\n--- Invoice {i} ---")
+        for j, line in enumerate(invoice):
+            print(f"[{j:02}] {line}")
+
+    
+
+
+
 
 
 root = tk.Tk()
