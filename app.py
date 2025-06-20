@@ -10,7 +10,6 @@ files_in_folder = []
 pdf_text_content = []
 invoice_data = []
 
-
 def select_folder():
     global selected_folder_path, files_in_folder
     selected_folder_path = filedialog.askdirectory()
@@ -61,18 +60,16 @@ def format_text_content():
     for pdf in pdf_text_content:
         invoice_data.append(pdf.split('\n'))
 
-    for invoice in invoice_data:
-        for i, line in enumerate(invoice):
-            if line == "Invoice number :":
-                i += 2
-            elif line == "Invoice date :":
-                i += 2
-            elif line == "PO number :":
-                i += 2
-            elif line == "TOTAL :":
-                i += 2
-            else:
-                del line
+    desired_field = ["Invoice number :", "Invoice date :", "Customer contract :", "TOTAL :"]
+
+    for i, invoice in enumerate(invoice_data):
+        extracted_data = []
+        for j, line in enumerate(invoice):
+            if line in desired_field :
+                extracted_data.append(line)
+                extracted_data.append(invoice[j + 1])
+
+        invoice_data[i] = extracted_data
 
     for i, invoice in enumerate(invoice_data):
         print(f"\n--- Invoice {i} ---")
