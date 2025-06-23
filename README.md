@@ -12,7 +12,12 @@ This tool serves to automate the generation of the monthly invoices summary file
 ## How It Works
 - The tool allows you to select a folder
 - Then for every invoice file within the directory, it parses the document into a single text file
-- It then generates a CSV file based on the categor(y/ies) identified by the user
+- It then generates a CSV file based on the categor(y/ies) identified internally
+- Finally it calculates the total amount accoss all invoices
 
-
+### Tools
+- Python
+- TKinter (GUI)
+- Fitz (Parse Text)
+- PyInstaller (Build EXE)
 
