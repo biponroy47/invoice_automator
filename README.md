@@ -1,7 +1,7 @@
 # Monthly Invoice Summary Automator
 
 ## Overview
-This tool serves to automate the generation of the monthly invoices summary file. Traditionally, individual invoices have been manually translated into a singular CSV file summarizing the overall monthly costs. This method is prone to errors, duplicated or missing entries, and typos. This tool aims to simplify the task so no or minimal manual processing is needed.
+This tool serves to automate the generation of the monthly invoices summary file for Alithya external contractors. Traditionally, individual invoices have been manually translated into a singular CSV file summarizing the overall monthly costs. This method is prone to errors, duplicated or missing entries, and typos. This tool aims to simplify the task so no or minimal manual processing is needed.
 
 ## Requirements/Notes
 #### You will need:
@@ -14,8 +14,5 @@ This tool serves to automate the generation of the monthly invoices summary file
 - Then for every invoice file within the directory, it parses the document into a single text file
 - It then generates a CSV file based on the categor(y/ies) identified by the user
 
-#### Note
-This tool is currently in testing phase. We will try 2 methods:
-1. Direct Text Parsing with Regex Extraction
-2. Region Selection with Text Parsing 
+
 
