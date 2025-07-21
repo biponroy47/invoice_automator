@@ -10,8 +10,7 @@ selected_folder_path = ""
 files_in_folder = []
 pdf_text_content = []
 invoice_data = []
-desired_field_single = ["Invoice number :", "Invoice date :", "Term :", "Currency :", "TOTAL :", ]
-desired_field_double = ["Customer contract :", "PO number :"]
+extracted_data = []
 csv_content = ""
 
 def select_folder():
@@ -36,12 +35,12 @@ def update_file_listbox():
             file_listbox.insert(tk.END, os.path.basename(file))
 
 
-# def print_invoices():
-#     global invoice_data
-#     for i, invoice in enumerate(invoice_data):
-#         print(f"\n--- Invoice {i} ---")
-#         for j, line in enumerate(invoice):
-#             print(f"[{j}] {line}")
+def print_invoices():
+    global invoice_data
+    for i, invoice in enumerate(invoice_data):
+        print(f"\n--- Invoice {i} ---")
+        for j, line in enumerate(invoice):
+            print(f"[{j}] {line}")
 
 
 def read_all_pdfs():
@@ -66,79 +65,110 @@ def read_all_pdfs():
 
 def format_text_content():
     global invoice_data
-    invoice_data = []
-
     for pdf in pdf_text_content:
         invoice_data.append(pdf.split('\n'))
 
+    print_invoices()
+
     for i, invoice in enumerate(invoice_data):
-        extracted_data = []
-        for j, line in enumerate(invoice):
-            if line in desired_field_single :
-                extracted_data.append({line: invoice[j + 1]})
-            elif line in desired_field_double :
-                extracted_data.append({line: invoice[j + 1] + invoice[j + 2]})
-        invoice_data[i] = extracted_data
+        data = ""
+        for j in range (len(invoice)):
+            if invoice[j] == "Invoice number :":
+                j += 1
+                while invoice[j] != "Invoice date :":
+                    data += invoice[j] + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "Invoice date :":
+                j += 1
+                while invoice[j] != "Customer contract :":
+                    data += invoice[j]  + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "Customer contract :":
+                j += 1
+                while invoice[j] != "PO number :":
+                    data += invoice[j]  + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "PO number :":
+                j += 1
+                while invoice[j] != "Term :":
+                    data += invoice[j]  + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "Term :":
+                j += 1
+                while invoice[j] != "Currency :":
+                    data += invoice[j]  + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "Currency :":
+                j += 1
+                while invoice[j] != "TOTAL :":
+                    data += invoice[j]  + " "
+                    j += 1
+                data += ","
+            if invoice[j] == "TOTAL :":
+                temp = invoice[j + 1].replace('$','').replace(',','')
+                data += temp + ","
+            while invoice[j] != "Project :":
+                j += 1
+
+            if invoice[j] == "Project :":
+                data += invoice[j + 1]
+                break
+
+        global extracted_data
+        extracted_data.append(data)
 
     generate_summary_button.pack(pady=5)
 
 
 def calculate_total():
     total = 0
-    for invoice in invoice_data:
-        for line in invoice:
-            if "TOTAL :" in line:
-                temp = float(line["TOTAL :"].replace('$','').replace(',',''))
-                total += temp
+    # for invoice in invoice_data:
+    #     for line in invoice:
+    #         if "TOTAL :" in line:
+    #             temp = float(line["TOTAL :"].replace('$','').replace(',',''))
+    #             total += temp
     return total
 
 def generate_summary():
     field_names = [
-        desired_field_single[0],
-        desired_field_single[1],
-        desired_field_single[2],
-        desired_field_single[3],
-        desired_field_double[0],
-        desired_field_double[1],
-        desired_field_single[4]
+        "Invoice number :",
+        "Invoice date :",
+        "Customer contract :",
+        "PO number :",
+        "Term :",
+        "Currency :",
+        "TOTAL :",
+        "Project :",
     ]
-    buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=field_names)
-    writer.writeheader()
-    invoices = list(invoice_data)
 
-    def process_next():
-        if not invoices:
-            global csv_content
-            csv_content = buffer.getvalue()
-            buffer.close()
-            status_label.config(text="Parsing complete!")
-            total = calculate_total()
-            csv_content += ",,,,,,,\n"
-            csv_content += ",,,,,Total,$" + str(total) + ""
-            save_button.pack(pady=20)
-            return
+    headers = ""
+    for field in field_names:
+        headers += field + ","
+    headers += "PL,Verified\n"
 
-        invoice = invoices.pop(0)
-        status_label.config(text=f"Parsing Invoice_{next(iter(invoice[0].values()))!r}.pdf ...")
-        row = {}
-        for pair in invoice:
-            if isinstance(pair, dict):
-                row.update(pair)
-            else:
-                k, v = pair
-                row[k] = v
+    global csv_content
+    csv_content += headers
 
-        writer.writerow(row)
-        root.after(200, process_next)
+    for row in extracted_data:
+        csv_content += row + "\n"
+        
+    # print(csv_content)
 
-    process_next()
+    status_label.config(text="Parsing complete!")
+
+    save_button.pack(pady=20)
+    return
 
 def save_file():
     file_path = filedialog.asksaveasfilename(
         defaultextension = ".csv",
         filetypes        = [("CSV files","*.csv")],
-        initialfile      = "transactions",
+        initialfile      = "invoices_summary",
         title            = "Save CSV as..."
     )
     
