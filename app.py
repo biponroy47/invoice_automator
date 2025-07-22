@@ -66,84 +66,77 @@ def read_all_pdfs():
 def format_text_content():
     global invoice_data
     for pdf in pdf_text_content:
-        invoice_data.append(pdf.split('\n'))
+        words = []
+        for line in pdf.split('\n'):
+            words.extend(line.split())
+        invoice_data.append(words)
+    # print_invoices()
 
-    print_invoices()
+
+    # Columns
+    # 1) Invoice number :
+    # 2) Invoice date :
+    # 3) Customer contract : 
+    # 4) PO number :
+    # 5) Term :
+    # 6) Currency :
+    # 7) TOTAL :
+    # 8) Project :
 
     for i, invoice in enumerate(invoice_data):
         data = ""
-        for j in range (len(invoice)):
-            if invoice[j] == "Invoice number :":
-                j += 1
-                while invoice[j] != "Invoice date :":
-                    data += invoice[j] + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "Invoice date :":
-                j += 1
-                while invoice[j] != "Customer contract :":
-                    data += invoice[j]  + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "Customer contract :":
-                j += 1
-                while invoice[j] != "PO number :":
-                    data += invoice[j]  + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "PO number :":
-                j += 1
-                while invoice[j] != "Term :":
-                    data += invoice[j]  + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "Term :":
-                j += 1
-                while invoice[j] != "Currency :":
-                    data += invoice[j]  + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "Currency :":
-                j += 1
-                while invoice[j] != "TOTAL :":
-                    data += invoice[j]  + " "
-                    j += 1
-                data += ","
-            if invoice[j] == "TOTAL :":
-                temp = invoice[j + 1].replace('$','').replace(',','')
-                data += temp + ","
-            while invoice[j] != "Project :":
-                j += 1
+        while invoice:
+            # print(invoice)
+            if len(invoice) >= 3:
+                if invoice[0:3] == ["Invoice", "number", ":"]:
+                    del invoice[0:3]
+                    data += invoice.pop(0) + ","
+                if invoice[0:3] == ["Invoice", "date", ":"]:
+                    del invoice[0:3]
+                    data += invoice.pop(0) + ","
+                if invoice[0:3] == ["Customer", "contract", ":"]:
+                    del invoice[0:3]
+                    while invoice[0:3] != ["PO", "number", ":"]:
+                        data += invoice.pop(0) + " "
+                    data += ","
+                if invoice[0:3] == ["PO", "number", ":"]:
+                    del invoice[0:3]
+                    while invoice[0:2] != ["Term", ":"]:
+                        data += invoice.pop(0) + " "
+                    data += ","
+                if invoice[0:2] == ["Term", ":"]:
+                    del invoice[0:2]
+                    data += invoice.pop(0) + ","
+                if invoice[0:2] == ["Currency", ":"]:
+                    del invoice[0:2]
+                    data += invoice.pop(0) + ","
+                if invoice[0:2] == ["TOTAL", ":"]:
+                    del invoice[0:2]
+                    data += invoice.pop(0).replace(',','') + ","
+                if invoice[0:2] == ["Project", ":"]:
+                    del invoice[0:2]
+                    while invoice[0] != "Description":
+                        data += invoice.pop(0) + " "
+                    data += ","
+            
+            invoice.pop(0)
 
-            if invoice[j] == "Project :":
-                data += invoice[j + 1]
-                break
-
+        # print(data)
         global extracted_data
         extracted_data.append(data)
 
     generate_summary_button.pack(pady=5)
 
-
-def calculate_total():
-    total = 0
-    # for invoice in invoice_data:
-    #     for line in invoice:
-    #         if "TOTAL :" in line:
-    #             temp = float(line["TOTAL :"].replace('$','').replace(',',''))
-    #             total += temp
-    return total
-
 def generate_summary():
     field_names = [
-        "Invoice number :",
-        "Invoice date :",
-        "Customer contract :",
-        "PO number :",
-        "Term :",
-        "Currency :",
-        "TOTAL :",
-        "Project :",
+        "Invoice Number",
+        "Invoice Date",
+        "Customer Contract",
+        "PO Number",
+        "Term",
+        "Currency",
+        "Total",
+        "Project Description",
     ]
 
     headers = ""
@@ -156,8 +149,8 @@ def generate_summary():
 
     for row in extracted_data:
         csv_content += row + "\n"
-        
-    # print(csv_content)
+
+    csv_content += ",,,,,,=SUM(G2:G" + str(len(extracted_data) + 1) + "),,,,"
 
     status_label.config(text="Parsing complete!")
 
